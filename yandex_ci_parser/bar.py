@@ -1,18 +1,14 @@
 # -*-coding: utf-8 -*-
 import re
+from yandex_ci_parser.util import get_domain
 
 
-class Bar(object):
+class BarCi(object):
     base_url = 'http://bar-navig.yandex.ru/u?show=31&url=http://{domain}/'
 
     @classmethod
     def get_url(cls, site):
-        domain = site
-        if '://' in site:
-            from urlparse import urlparse
-            o = urlparse(site)
-            domain = o.hostname
-        return cls.base_url.format(domain=domain)
+        return cls.base_url.format(domain=get_domain(site))
 
     @classmethod
     def _get_bar_value(cls, regexp, content):
@@ -37,4 +33,7 @@ class Bar(object):
         result = {}
         for key, regexp in params.items():
             result[key] = cls._get_bar_value(regexp, content)
+            if key == 'value':
+                result[key] = int(result[key])
+
         return result

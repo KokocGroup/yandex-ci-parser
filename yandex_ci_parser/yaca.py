@@ -1,27 +1,20 @@
 # -*-coding: utf-8 -*-
 import re
+from yandex_ci_parser.errors import IncorrectParserError
+from yandex_ci_parser.util import get_domain
 
-
-class Yaca(object):
+class YacaCi(object):
     base_url = 'http://yaca.yandex.ru/yca/cy/ch/{domain}/'
 
     @classmethod
-    def get_domain(cls, site):
-        domain = site
-        if '://' in site:
-            from urlparse import urlparse
-            o = urlparse(site)
-            domain = o.hostname
-        return domain
-
-    @classmethod
     def get_url(cls, site):
-        return cls.base_url.format(domain=cls.get_domain(site))
+        return cls.base_url.format(domain=get_domain(site))
 
     @classmethod
-    def result(cls, site, content):
-        domain = cls.get_domain(site)
-        # Ci unknown
+    def result(cls, content, site):
+        domain = get_domain(site)
+
+        # is ci
         pattern = re.compile(
             ur'<a href="[^"]*{domain}[^"]*" target="_blank">[^<]*</a><div>[^<]*</div>\s*</td>\s*<td>(\d+)<\/td>'.format(
                 domain=re.escape(domain)
@@ -46,4 +39,4 @@ class Yaca(object):
         if res:
             return int(res.group(1))
 
-        raise Exception(u'Incorrect parser')
+        raise IncorrectParserError()
